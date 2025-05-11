@@ -21,5 +21,7 @@ namespace CloudPOE.Models
         // Navigation Properties
         public virtual Event? Events { get; set; }
         public virtual Venues? Venue { get; set; }
+
+
     }
 }
