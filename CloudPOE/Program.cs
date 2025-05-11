@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using CloudPOE.Data;
+using CloudPOE.Service;
 namespace CloudPOE
 {
     public class Program
@@ -14,7 +15,10 @@ namespace CloudPOE
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            
+            var defaultConnectionString = builder.Configuration.GetConnectionString("defaultConnectionString");
+
+            //register blob service
+            builder.Services.AddSingleton<BlobService>(provider => new BlobService(defaultConnectionString));
 
             var app = builder.Build();
 

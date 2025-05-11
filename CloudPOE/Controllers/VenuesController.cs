@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CloudPOE.Data;
 using CloudPOE.Models;
+using CloudPOE.Service;
 
 namespace CloudPOE.Controllers
 {
@@ -14,9 +15,17 @@ namespace CloudPOE.Controllers
     {
         private readonly CloudPOEContext _context;
 
-        public VenuesController(CloudPOEContext context)
+        private readonly BlobService _blobService;
+
+        //public VenuesController(CloudPOEContext context)
+        //{
+        //    _context = context;
+        //}
+
+        public VenuesController(CloudPOEContext context, BlobService blobService)
         {
             _context = context;
+            _blobService = blobService;
         }
 
         // GET: Venues
@@ -54,8 +63,24 @@ namespace CloudPOE.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VenueID,VenueName,location,Capacity,URLImage")] Venues venues)
+        public async Task<IActionResult> Create([Bind("VenueID,VenueName,location,Capacity,URLImage")] Venues venues, IFormFile file)
         {
+            if (file != null)
+            {
+                var fileName = file.FileName;
+                var blobExists = await _blobService.BlobExistsAsync(fileName);
+
+                //step 11
+                if (blobExists)
+                {
+                    ModelState.AddModelError("URLImage", "Image has been uploaded previously.");
+                    return View(venues);
+                }
+                using var stream = file.OpenReadStream();
+                var blob = await _blobService.uploadAsync(stream, file.FileName);
+                venues.URLImage = blob;
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(venues);
@@ -119,19 +144,21 @@ namespace CloudPOE.Controllers
         // GET: Venues/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            var venue = await _context.Venues.FindAsync(id);
+            if (venue != null)
             {
-                return NotFound();
-            }
+                // Delete the image from Azure Blob Storage
+                if (!string.IsNullOrEmpty(venue.URLImage))
+                {
+                    // Extract the blob name from the URL 
+                    var blobName = Path.GetFileName(new Uri(venue.URLImage).LocalPath);
+                    await _blobService.DeleteBlobAsync(blobName);
+                }
 
-            var venues = await _context.Venues
-                .FirstOrDefaultAsync(m => m.VenueID == id);
-            if (venues == null)
-            {
-                return NotFound();
+                _context.Venues.Remove(venue);
+                await _context.SaveChangesAsync();
             }
-
-            return View(venues);
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Venues/Delete/5
