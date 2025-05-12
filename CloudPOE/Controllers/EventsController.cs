@@ -139,6 +139,13 @@ namespace CloudPOE.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // Validation: prevent delete if there are bookings
+            bool hasBookings = await _context.Bookings.AnyAsync(b => b.EventID == id);
+            if (hasBookings)
+            {
+                TempData["ErrorMessage"] = "Cannot delete this event as it has associated bookings.";
+                return RedirectToAction(nameof(Index));
+            }
             var @event = await _context.Event.FindAsync(id);
             if (@event != null)
             {

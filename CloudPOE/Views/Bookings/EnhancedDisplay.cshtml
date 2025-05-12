@@ -1,0 +1,35 @@
+﻿@model IEnumerable<CloudPOE.Models.bookingViewModel>
+
+<h2>Enhanced Booking Display</h2>
+
+<form method="get">
+    <input type="text" name="searchTerm" placeholder="Search for the Event Name" />
+    <button type="submit">Search</button>
+</form>
+
+<table class="table">
+    <tr>
+        <th>Booking ID</th>
+        <th>BookingDate</th>
+        <th>Event Name</th>
+        <th>Event Date</th>
+        <th>Description</th>
+        <th>Venue Name</th>
+        <th>location</th>
+        <th>Capacity</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.BookingId</td>
+            <td>@item.BookingDate </td>
+            <td>@item.EventName</td>
+            <td>@item.EventDate</td>
+            <td>@item.Description</td>
+            <td>@item.VenueName</td>
+            <td>@item.Location</td>
+            <td>@item.Capacity</td>
+        </tr>
+    }
+</table>
+

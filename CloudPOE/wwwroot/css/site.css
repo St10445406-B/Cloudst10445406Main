@@ -74,3 +74,31 @@ body {
         transform: scale(1.05);
     }
 
+
+.highlight-button-container {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.highlight-button {
+    display: inline-block;
+    padding: 20px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff4081, #ff80ab);
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 64, 129, 0.4);
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .highlight-button:hover {
+        background: linear-gradient(135deg, #f50057, #ff4081);
+        transform: scale(1.08);
+        box-shadow: 0 8px 18px rgba(255, 64, 129, 0.6);
+    }
+
+

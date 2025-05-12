@@ -144,13 +144,41 @@ namespace CloudPOE.Controllers
         // GET: Venues/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var venue = await _context.Venues
+                .FirstOrDefaultAsync(m => m.VenueID == id);
+            if (venue == null)
+            {
+                return NotFound();
+            }
+
+            return View(venue);
+        }
+
+
+        // POST: Venues/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            // Validation: prevent delete if there are bookings
+            bool hasBookings = await _context.Bookings.AnyAsync(b => b.VenueID == id);
+            if (hasBookings)
+            {
+                TempData["ErrorMessage"] = "Cannot delete this venue as it has associated bookings.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var venue = await _context.Venues.FindAsync(id);
             if (venue != null)
             {
                 // Delete the image from Azure Blob Storage
                 if (!string.IsNullOrEmpty(venue.URLImage))
                 {
-                    // Extract the blob name from the URL 
                     var blobName = Path.GetFileName(new Uri(venue.URLImage).LocalPath);
                     await _blobService.DeleteBlobAsync(blobName);
                 }
@@ -158,21 +186,6 @@ namespace CloudPOE.Controllers
                 _context.Venues.Remove(venue);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index));
-        }
-
-        // POST: Venues/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var venues = await _context.Venues.FindAsync(id);
-            if (venues != null)
-            {
-                _context.Venues.Remove(venues);
-            }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

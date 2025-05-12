@@ -4,6 +4,7 @@ using CloudPOE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudPOE.Migrations
 {
     [DbContext(typeof(CloudPOEContext))]
-    partial class CloudPOEContextModelSnapshot : ModelSnapshot
+    [Migration("20250512091808_ChangeBookingDateToDateOnly")]
+    partial class ChangeBookingDateToDateOnly
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,14 +33,14 @@ namespace CloudPOE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("bookingID"));
 
-                    b.Property<DateTime?>("BookingDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("EventID")
                         .HasColumnType("int");
 
                     b.Property<int>("VenueID")
                         .HasColumnType("int");
+
+                    b.Property<DateOnly?>("bookingDate")
+                        .HasColumnType("date");
 
                     b.HasKey("bookingID");
 
@@ -45,7 +48,7 @@ namespace CloudPOE.Migrations
 
                     b.HasIndex("VenueID");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("CloudPOE.Models.Event", b =>
@@ -69,7 +72,7 @@ namespace CloudPOE.Migrations
 
                     b.HasKey("EventID");
 
-                    b.ToTable("Event", (string)null);
+                    b.ToTable("Event");
                 });
 
             modelBuilder.Entity("CloudPOE.Models.Venues", b =>
@@ -97,7 +100,7 @@ namespace CloudPOE.Migrations
 
                     b.HasKey("VenueID");
 
-                    b.ToTable("Venues", (string)null);
+                    b.ToTable("Venues");
                 });
 
             modelBuilder.Entity("CloudPOE.Models.Bookings", b =>

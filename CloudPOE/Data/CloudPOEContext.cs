@@ -17,5 +17,18 @@ namespace CloudPOE.Data
         public DbSet<CloudPOE.Models.Venues> Venues { get; set; } = default!;
         public DbSet<CloudPOE.Models.Event> Event { get; set; } = default!;
         public DbSet<CloudPOE.Models.Bookings> Bookings { get; set; } = default!;
+
+        public DbSet<bookingViewModel> bookingViewModels { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configure the view as keyless
+            modelBuilder.Entity<bookingViewModel>(eb =>
+            {
+                eb.HasNoKey();
+                eb.ToView("bookingViewModel");
+            });
+        }
     }
+    
 }

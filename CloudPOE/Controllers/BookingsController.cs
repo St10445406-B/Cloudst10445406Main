@@ -20,10 +20,33 @@ namespace CloudPOE.Controllers
         }
 
         // GET: Bookings
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
             var cloudPOEContext = _context.Bookings.Include(b => b.Events).Include(b => b.Venue);
             return View(await cloudPOEContext.ToListAsync());
+            //if (_context.Bookings == null)
+            //{
+            //    return Problem("Entity set 'cloudTasksContext.student' is null.");
+            //}
+
+            //// Start with the full list of students
+            //var students = from s in _context.Bookings
+            //               select s;
+
+            //// Apply search filter if searchString is provided
+            //if (!string.IsNullOrEmpty(searchString))
+            //{
+            //    students = students.Where(s => s.Events != null && s.Events.EventName != null && s.Events.EventName.ToUpper().Contains(searchString.ToUpper()));
+            //}
+            //// Create a ViewModel to pass the filtered students and search string to the view
+            //var bookingViewModel = new bookingViewModel
+            //{
+            //    bookings = await students.ToListAsync(),
+            //    SearchString = searchString
+            //};
+
+            //return View(bookingViewModel);
+            
         }
 
         // GET: Bookings/Details/5
@@ -61,6 +84,13 @@ namespace CloudPOE.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("bookingID,EventID,VenueID,bookingDate")] Bookings bookings)
         {
+            bool doubleBooked = _context.Bookings.Any(b => b.VenueID == bookings.VenueID && b.BookingDate == bookings.BookingDate);
+
+            if (doubleBooked)
+            {
+                TempData["ErrorMessage"] = "This venue is already booked for the selected date.";
+                return RedirectToAction(nameof(Index)); // return to the same form with the error
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(bookings);
@@ -166,5 +196,69 @@ namespace CloudPOE.Controllers
         {
             return _context.Bookings.Any(e => e.bookingID == id);
         }
+
+
+        public ActionResult EnhancedDisplay(string searchTerm)
+        {
+            var bookings = from b in _context.Bookings
+                           join e in _context.Event on b.EventID equals e.EventID
+                           join v in _context.Venues on b.VenueID equals v.VenueID
+                           select new bookingViewModel
+                           {
+                               BookingId = b.bookingID,
+                               BookingDate = b.BookingDate,
+                               EventName = e.EventName,
+                               EventDate = e.EventDate,
+                               Description = e.Description,
+                               VenueName = v.VenueName,
+                               Location = v.location,
+                               Capacity = v.Capacity
+                           };
+
+            // Search logic
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                bookings = bookings.Where(b =>
+                    b.BookingId.ToString().Contains(searchTerm) ||
+                    b.EventName.Contains(searchTerm));
+            }
+
+            return View(bookings.ToList());
+        }
+        //public async Task<IActionResult> EnhancedDisplay(string searchString)
+        //{
+        //    // Query directly from the SQL view
+        //    var query = _context.bookingViewModels.AsQueryable();
+
+        //    if (!string.IsNullOrEmpty(searchString))
+        //    {
+        //        if (int.TryParse(searchString, out int bookingId))
+        //        {
+        //            query = query.Where(b => b.BookingId == bookingId);
+        //        }
+        //        else
+        //        {
+        //            query = query.Where(b => b.EventName.Contains(searchString));
+        //        }
+        //    }
+
+        //    var result = await query.Select(b => new bookingViewModel
+        //    {
+        //        BookingId = b.BookingId,
+        //        BookingDate = b.BookingDate,
+        //        EventName = b.EventName,
+        //        EventDate = b.EventDate,
+        //        Description = b.Description,
+        //        VenueName = b.VenueName,
+        //        Location = b.Location,
+        //        Capacity = b.Capacity
+        //    }).ToListAsync();
+
+
+        //    return View(result);
+        //}
+
+
+
     }
 }

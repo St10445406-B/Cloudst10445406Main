@@ -16,7 +16,8 @@ namespace CloudPOE.Models
         [Required]
         [ForeignKey(nameof(VenueID))]
         public int VenueID { get; set; }
-        public string? bookingDate { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime? BookingDate { get; set; }
 
         // Navigation Properties
         public virtual Event? Events { get; set; }
