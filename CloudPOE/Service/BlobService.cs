@@ -5,7 +5,7 @@ namespace CloudPOE.Service
     public class BlobService
     {
         private readonly BlobServiceClient _blobServiceClient;
-        //go to storage browser
+        
         private readonly string _containerName = "blobtest";
 
         public BlobService(string connectionString)
@@ -20,7 +20,7 @@ namespace CloudPOE.Service
             await blobClient.UploadAsync(fileStream, true);
             return blobClient.Uri.ToString();
         }
-        //new code step 10
+        
 
         public async Task<bool> BlobExistsAsync(string fileName)
         {
